@@ -135,16 +135,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:url("d
 
 .footer{text-align:center;color:rgba(255,255,255,.28);font-size:.72rem;margin-top:18px;padding-bottom:10px;}
 
-/* ─ GitHub同期モーダル ─ */
-.gh-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.82);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
-.gh-overlay.hidden{display:none;}
-.gh-box{background:#0d1e36;border:2px solid rgba(255,215,0,.4);border-radius:14px;padding:24px;max-width:420px;width:100%;color:#fff;}
-.gh-box h3{color:var(--gold);font-size:1rem;font-weight:900;margin-bottom:16px;text-align:center;}
-.gh-field{margin-bottom:12px;}
-.gh-field label{display:block;font-size:.72rem;color:#c4a8f0;margin-bottom:4px;font-weight:700;}
-.gh-inp{width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.18);border-radius:8px;padding:7px 11px;font-size:.84rem;font-family:inherit;color:#fff;font-weight:600;outline:none;}
-.gh-inp:focus{border-color:var(--gold);}
-.gh-inp::placeholder{color:rgba(255,255,255,.3);font-weight:400;}
 #gh-sync-status{font-size:.74rem;font-weight:700;margin-left:4px;}
 
 /* ─ 詳細ボタン (マッチカード内) ─ */
@@ -382,42 +372,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background-image:url("d
 
 <div class="data-bar">
   <span class="data-bar-label">💾 データ管理</span>
-  <button class="btn btn-primary btn-sm" onclick="exportJSON()">📤 エクスポート</button>
-  <button class="btn btn-sm" style="background:#555;color:#fff;font-weight:700" onclick="document.getElementById('imp-file').click()">📥 インポート</button>
-  <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importJSON(event)">
-  <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 全リセット</button>
-  <button class="btn btn-sm" style="background:rgba(36,99,235,.7);color:#fff;font-weight:700;" onclick="openGhModal()">🔗 GitHub同期設定</button>
-  <button class="btn btn-sm" style="background:rgba(34,197,94,.25);border:1px solid rgba(34,197,94,.5);color:#86efac;font-weight:700;" onclick="manualSync()">☁️ 今すぐ同期</button>
-  <span id="gh-sync-status"></span>
+  <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 データをリセット</button>
+  <span style="color:rgba(255,215,0,.7);font-size:.75rem;font-weight:700;flex-shrink:0;">🔑 GitHub Token:</span>
+  <input type="password" id="gh-token-inline" placeholder="ghp_xxxx..." autocomplete="off"
+    style="background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:6px;padding:4px 10px;font-size:.75rem;font-family:inherit;color:#fff;outline:none;width:220px;flex-shrink:0;"
+    oninput="onGhTokenInput(this.value)">
+  <span id="gh-sync-status" style="font-size:.74rem;font-weight:700;flex-shrink:0;"></span>
   <span class="data-bar-info" id="last-saved">―</span>
-</div>
-
-<!-- GitHub同期設定モーダル -->
-<div class="gh-overlay hidden" id="gh-modal">
-  <div class="gh-box">
-    <h3>🔗 GitHub 自動同期設定</h3>
-    <div class="gh-field">
-      <label>Personal Access Token（repo権限必須）</label>
-      <input type="password" id="gh-token" class="gh-inp" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    </div>
-    <div class="gh-field">
-      <label>GitHubユーザー名</label>
-      <input type="text" id="gh-owner" class="gh-inp" placeholder="sisanunyou2001-lang">
-    </div>
-    <div class="gh-field">
-      <label>リポジトリ名</label>
-      <input type="text" id="gh-repo" class="gh-inp" placeholder="mahokakuteam">
-    </div>
-    <p style="font-size:.68rem;color:rgba(255,255,255,.3);margin-top:6px;line-height:1.6">
-      ✅ データ変更時に自動でGitHubへ保存されます<br>
-      ✅ 30秒ごとに他ユーザーの変更を自動取得します<br>
-      🔒 トークンはブラウザにのみ保存されます
-    </p>
-    <div class="mem-btn-row" style="margin-top:14px;">
-      <button style="background:linear-gradient(135deg,#1565c0,#1976d2);border:none;border-radius:8px;color:#fff;padding:8px 18px;font-family:inherit;cursor:pointer;font-size:.85rem;font-weight:700;" onclick="saveGhModal()">✅ 保存して同期開始</button>
-      <button style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#aaa;padding:8px 14px;font-family:inherit;cursor:pointer;font-size:.8rem;" onclick="closeGhModal()">キャンセル</button>
-    </div>
-  </div>
 </div>
 
 <div class="footer">🏆 まほかく 最強サークル決定戦 ｜ チーム戦 5セット制 ｜ 自動保存</div>
@@ -1338,9 +1299,11 @@ document.getElementById('t-modal').addEventListener('click', function (e) {
 });
 
 /* ═══════ GITHUB 同期 ═══════ */
-const GH_SK = 'mahokaku_gh_v1';
+const GH_SK   = 'mahokaku_gh_v1';
 const GH_FILE = 'tourney_data.json';
-let ghSettings = { token: '', owner: '', repo: '' };
+const GH_OWNER = 'sisanunyou2001-lang';  // 固定
+const GH_REPO  = 'mahokakuteam';         // 固定
+let ghSettings = { token: '' };
 let _ghPollTimer = null;
 
 function loadGhSettings() {
@@ -1348,24 +1311,22 @@ function loadGhSettings() {
 }
 function saveGhSettings() { localStorage.setItem(GH_SK, JSON.stringify(ghSettings)); }
 
-function openGhModal() {
-  document.getElementById('gh-token').value = ghSettings.token || '';
-  document.getElementById('gh-owner').value = ghSettings.owner || '';
-  document.getElementById('gh-repo').value  = ghSettings.repo  || '';
-  document.getElementById('gh-modal').classList.remove('hidden');
+// トークン入力欄の変更ハンドラ
+let _ghTokenTimer = null;
+function onGhTokenInput(val) {
+  clearTimeout(_ghTokenTimer);
+  _ghTokenTimer = setTimeout(() => {
+    ghSettings.token = val.trim();
+    saveGhSettings();
+    if (ghSettings.token) {
+      startGhPolling();
+      syncToGitHub();
+    } else {
+      if (_ghPollTimer) { clearInterval(_ghPollTimer); _ghPollTimer = null; }
+      showSyncStatus('off');
+    }
+  }, 800);
 }
-function closeGhModal() { document.getElementById('gh-modal').classList.add('hidden'); }
-function saveGhModal() {
-  ghSettings.token = document.getElementById('gh-token').value.trim();
-  ghSettings.owner = document.getElementById('gh-owner').value.trim();
-  ghSettings.repo  = document.getElementById('gh-repo').value.trim();
-  saveGhSettings();
-  closeGhModal();
-  showIndicator('GitHub設定を保存しました ✓');
-  startGhPolling();
-  syncToGitHub();
-}
-function manualSync() { fetchFromGitHub().then(updated => { if (updated) { renderTournament(); showIndicator('GitHubから最新データを取得しました ✓'); } else { showIndicator('最新の状態です ✓'); } }); }
 
 function showSyncStatus(status) {
   const el = document.getElementById('gh-sync-status');
@@ -1376,22 +1337,20 @@ function showSyncStatus(status) {
   else { el.textContent = '⚠️'; el.style.color = '#fca5a5'; el.title = '同期エラー（トークン・設定を確認）'; }
 }
 
-async function ghApiHeaders() {
+function ghApiHeaders() {
   return { 'Authorization': 'Bearer ' + ghSettings.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
 }
 async function getFileSha() {
-  const { token, owner, repo } = ghSettings;
-  if (!token || !owner || !repo) return null;
+  if (!ghSettings.token) return null;
   try {
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${GH_FILE}`, { headers: await ghApiHeaders() });
+    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, { headers: ghApiHeaders() });
     if (res.status === 404) return null;
     if (!res.ok) return undefined;
     return (await res.json()).sha;
   } catch { return undefined; }
 }
 async function syncToGitHub() {
-  const { token, owner, repo } = ghSettings;
-  if (!token || !owner || !repo) return;
+  if (!ghSettings.token) return;
   showSyncStatus('syncing');
   const sha = await getFileSha();
   if (sha === undefined) { showSyncStatus('error'); return; }
@@ -1399,20 +1358,18 @@ async function syncToGitHub() {
   const body = { message: 'データ更新', content };
   if (sha) body.sha = sha;
   try {
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${GH_FILE}`, { method: 'PUT', headers: await ghApiHeaders(), body: JSON.stringify(body) });
+    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, { method: 'PUT', headers: ghApiHeaders(), body: JSON.stringify(body) });
     showSyncStatus(res.ok ? 'ok' : 'error');
   } catch { showSyncStatus('error'); }
 }
 async function fetchFromGitHub() {
-  const { token, owner, repo } = ghSettings;
-  if (!token || !owner || !repo) return false;
+  if (!ghSettings.token) return false;
   try {
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${GH_FILE}`, { headers: await ghApiHeaders() });
+    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, { headers: ghApiHeaders() });
     if (res.status === 404) return false;
     if (!res.ok) return false;
     const data = await res.json();
     const s = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
-    // ローカルより新しい場合のみ上書き
     const localRaw = localStorage.getItem(SK);
     if (localRaw) {
       const local = JSON.parse(localRaw);
@@ -1442,6 +1399,9 @@ window.addEventListener('DOMContentLoaded', async function () {
   loadGhSettings();
   loadAll();
   renderTournament();
+  // トークン入力欄に保存済みトークンを復元
+  const tokenEl = document.getElementById('gh-token-inline');
+  if (tokenEl && ghSettings.token) tokenEl.value = ghSettings.token;
   if (ghSettings.token) {
     const updated = await fetchFromGitHub();
     if (updated) renderTournament();
