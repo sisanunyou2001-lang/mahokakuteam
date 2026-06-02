@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏆 まほかく 最強サークル決定戦</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+:root{
+  --dark1:#0e0720;--dark2:#1a0d38;--pur1:#3d1a6e;--pur2:#6b35b8;--pur3:#9b6fd4;
+  --gold:#ffd700;--gold2:#ffb800;--red:#c62828;--blue:#1565c0;--green:#2e7d32;
+  --cream:#faf8ff;--shadow:0 4px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans JP',Arial,sans-serif;background:linear-gradient(135deg,#0e0720,#1a0d38 40%,#220e50 70%,#0e0720);min-height:100vh;padding:20px;color:#222;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 20L50 20L38 30L43 45L30 36L17 45L22 30L10 20L25 20Z' fill='none' stroke='%23ffffff06' stroke-width='1'/%3E%3C/svg%3E");pointer-events:none;}
+.wrapper{position:relative;z-index:1;max-width:1400px;margin:0 auto;}
+
+/* ─ Header ─ */
+.header{background:linear-gradient(135deg,#1a0d38,#3d1a6e 50%,#1a0d38);border:2px solid var(--gold);border-radius:16px;padding:18px 26px;margin-bottom:20px;box-shadow:var(--shadow),0 0 50px rgba(107,53,184,.25);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.header-icon{font-size:2.2rem;filter:drop-shadow(0 0 10px rgba(255,215,0,.5));}
+.header-text h1{font-size:1.6rem;font-weight:900;color:var(--gold);text-shadow:0 2px 12px rgba(255,215,0,.4);}
+.header-text p{color:#c4a8f0;font-size:.8rem;margin-top:3px;}
+.header-meta{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.meta-box{background:rgba(0,0,0,.35);border:1px solid var(--gold);border-radius:8px;padding:6px 14px;text-align:center;}
+.meta-box label{display:block;font-size:.68rem;color:#c4a8f0;}
+.meta-box .meta-val{color:var(--gold);font-size:1.05rem;font-weight:900;}
+
+/* ─ Buttons ─ */
+.btn{padding:8px 16px;border:none;border-radius:8px;font-family:inherit;font-size:.83rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+.btn:active{transform:translateY(1px)!important;}
+.btn-primary{background:var(--pur2);color:#fff;}
+.btn-primary:hover{background:var(--pur1);transform:translateY(-1px);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{opacity:.85;transform:translateY(-1px);}
+.btn-sm{padding:5px 11px;font-size:.75rem;}
+
+/* ─ Data bar ─ */
+.data-bar{background:rgba(0,0,0,.22);border:1px solid rgba(255,215,0,.15);border-radius:10px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.data-bar-label{color:rgba(255,215,0,.7);font-size:.78rem;font-weight:600;}
+.data-bar-info{color:rgba(255,255,255,.4);font-size:.73rem;margin-left:auto;}
+
+/* ─ Save indicator ─ */
+#save-indicator{position:fixed;bottom:20px;right:20px;z-index:9999;background:rgba(26,13,56,.92);border:1.5px solid var(--gold);border-radius:24px;padding:7px 16px;display:flex;align-items:center;gap:8px;font-size:.8rem;color:#c4a8f0;font-weight:600;backdrop-filter:blur(6px);transition:opacity .4s,transform .4s;opacity:0;transform:translateY(8px);pointer-events:none;}
+#save-indicator.show{opacity:1;transform:translateY(0);}
+#save-indicator .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);}
+
+/* ─ Tournament Bracket ─ */
+.tourney-wrap{background:#06111f;border-radius:14px;padding:22px;overflow-x:auto;box-shadow:var(--shadow);border:2px solid rgba(255,215,0,.2);}
+.tourney-section-label{color:var(--gold);font-size:.72rem;font-weight:900;letter-spacing:3px;text-align:center;padding:5px 0 12px;text-transform:uppercase;}
+.bracket-flow{display:flex;align-items:stretch;gap:0;min-width:900px;}
+.b-col{display:flex;flex-direction:column;align-items:center;flex:1;min-width:140px;}
+.b-col-hdr{color:var(--gold);font-size:.68rem;font-weight:900;letter-spacing:1.5px;text-align:center;padding:6px 8px;border-bottom:2px solid rgba(255,215,0,.4);width:100%;margin-bottom:10px;}
+/* 試合カードを縦方向に均等配置するラッパー */
+.b-matches{flex:1;display:flex;flex-direction:column;justify-content:space-around;align-items:center;width:100%;}
+/* 決勝列の上下半分 */
+.b-finals-half{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;}
+.b-match{background:#0d1e36;border:1.5px solid rgba(255,255,255,.1);border-radius:6px;margin:3px 5px;position:relative;width:200px;flex-shrink:0;}
+.bm-gf{border-color:var(--gold)!important;box-shadow:0 0 14px rgba(255,215,0,.2);}
+.b-match-num{font-size:.56rem;color:rgba(255,215,0,.55);padding:2px 7px 1px;border-bottom:1px solid rgba(255,255,255,.06);letter-spacing:.5px;}
+.b-slot{padding:6px 8px;display:flex;align-items:center;min-height:35px;border-left:3px solid transparent;gap:4px;}
+.b-slot.clickable{cursor:pointer;}
+.b-slot.clickable:hover{filter:brightness(1.15);}
+.bs-ub{background:rgba(21,101,192,.80);border-left-color:#1565c0;}
+.bs-lb{background:rgba(198,40,40,.80);border-left-color:#c62828;}
+.bs-champ{background:linear-gradient(90deg,rgba(140,90,0,.85),rgba(200,145,10,.85));border-left-color:#f0c840;box-shadow:0 0 8px rgba(255,200,30,.5);}
+.bs-champ .b-score{background:rgba(255,215,0,.35);color:#fff;}
+.bs-champ .b-pname{color:#ffe066;}
+.bs-lose-ub{background:rgba(21,101,192,.15);border-left-color:#1565c0;opacity:.55;}
+.bs-lose-lb{background:rgba(198,40,40,.22);border-left-color:#c62828;opacity:.55;}
+.bs-tbd{background:rgba(255,255,255,.03);border-left-color:transparent;}
+.b-pname{flex:1;font-size:.77rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:175px;}
+.bs-tbd .b-pname{color:rgba(255,255,255,.22);font-style:italic;font-weight:400;font-size:.7rem;}
+.bs-lose-ub .b-pname,.bs-lose-lb .b-pname{color:rgba(255,255,255,.4);}
+.b-score{font-size:.75rem;font-weight:900;background:rgba(255,255,255,.15);border-radius:3px;padding:0 5px;color:#fff;flex-shrink:0;min-width:20px;text-align:center;}
+.b-slot-sep{height:1px;background:rgba(255,255,255,.07);}
+#bracket-main{position:relative;overflow:visible;}
+#bracket-svg{position:absolute;top:0;left:0;pointer-events:none;overflow:visible;z-index:0;}
+.bracket-flow{position:relative;z-index:1;}
+.tourney-players-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.t-seed-box{background:#0d1e36;border:1.5px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;}
+.t-seed-num{color:var(--gold);font-size:.72rem;font-weight:900;width:22px;flex-shrink:0;}
+.t-seed-input{background:transparent;border:none;color:#fff;font-size:.84rem;font-weight:700;font-family:inherit;flex:1;outline:none;}
+.t-seed-input::placeholder{color:rgba(255,255,255,.25);font-weight:400;}
+.tourney-toolbar{display:flex;gap:8px;margin-bottom:0;flex-wrap:wrap;align-items:center;}
+.tourney-status{font-size:.76rem;color:rgba(255,255,255,.4);margin-left:auto;}
+.champion-banner{background:linear-gradient(90deg,#c8900e,#f0c840 50%,#c8900e);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px;animation:pulse-gold 2.8s ease-in-out infinite;}
+.champion-banner .ch-title{font-size:.75rem;letter-spacing:3px;color:rgba(255,255,255,.85);font-weight:700;}
+.champion-banner .ch-name{font-size:1.6rem;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.4);}
+@keyframes pulse-gold{0%,100%{box-shadow:0 6px 32px rgba(255,200,30,.7)}50%{box-shadow:0 6px 40px rgba(255,200,30,.95)}}
+
+/* ─ 5-Set Match Modal ─ */
+.t-result-modal{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:24px 20px;overflow-y:auto;}
+.t-result-modal.hidden{display:none;}
+.t-result-inner{background:#0d1e36;border:2px solid rgba(255,215,0,.5);border-radius:14px;padding:22px 24px;max-width:560px;width:100%;color:#fff;margin:auto 0;}
+.t-result-inner h3{color:var(--gold);font-weight:900;font-size:1rem;text-align:center;margin-bottom:14px;}
+
+/* Match header */
+.t-match-header{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.t-team{font-size:.95rem;font-weight:900;max-width:140px;text-align:center;word-break:break-all;}
+.t-team1{color:#64b5f6;}
+.t-team2{color:#ef9a9a;}
+.t-match-score-box{background:rgba(0,0,0,.4);border:1.5px solid var(--gold);border-radius:10px;padding:6px 20px;text-align:center;}
+.t-match-score-label{display:block;font-size:.6rem;color:rgba(255,215,0,.6);margin-bottom:1px;}
+.t-match-score-val{font-size:1.6rem;font-weight:900;color:var(--gold);}
+
+/* Set panels */
+.t-set-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 12px;margin-bottom:7px;transition:opacity .2s;}
+.t-set-panel.locked{opacity:.25;pointer-events:none;}
+.t-set-top{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.t-set-label{color:rgba(255,215,0,.9);font-size:.73rem;font-weight:900;letter-spacing:.5px;}
+.t-set-type-badge{background:rgba(107,53,184,.55);border-radius:4px;padding:2px 8px;font-size:.65rem;color:#c4a8f0;font-weight:700;}
+.t-set-result{margin-left:auto;font-size:.8rem;font-weight:900;}
+.t-set-result.w0{color:#64b5f6;}
+.t-set-result.w1{color:#ef9a9a;}
+.t-set-result.pending{color:rgba(255,255,255,.25);font-size:.7rem;font-weight:400;}
+
+/* Game buttons */
+.t-games-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
+.t-game-block{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.t-game-lbl{font-size:.6rem;color:rgba(255,255,255,.3);font-weight:700;}
+.t-gbtn-row{display:flex;gap:4px;}
+.tgb{padding:5px 8px;border-radius:5px;border:1.5px solid rgba(255,255,255,.12);font-size:.73rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .14s;background:rgba(255,255,255,.07);color:rgba(255,255,255,.65);min-width:46px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:96px;}
+.tgb:hover:not(.dis){border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.14);}
+.tgb.act-t1{background:#1565c0;border-color:#1976d2;color:#fff;}
+.tgb.act-t2{background:#c62828;border-color:#d32f2f;color:#fff;}
+.tgb.dis{opacity:.18;pointer-events:none;}
+
+/* Modal footer */
+.t-confirm-btn{width:100%;padding:11px;background:linear-gradient(135deg,#2e7d32,#43a047);border:none;border-radius:8px;color:#fff;font-weight:900;font-size:.92rem;cursor:pointer;font-family:inherit;margin-top:14px;transition:all .2s;box-shadow:0 3px 12px rgba(46,125,50,.3);}
+.t-confirm-btn:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px);}
+.t-confirm-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;filter:none;}
+.t-cancel-btn{width:100%;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:transparent;color:rgba(255,255,255,.4);font-family:inherit;cursor:pointer;font-size:.8rem;margin-top:6px;}
+.t-cancel-btn:hover{background:rgba(255,255,255,.05);}
+
+.footer{text-align:center;color:rgba(255,255,255,.28);font-size:.72rem;margin-top:18px;padding-bottom:10px;}
+
+/* ─ 詳細ボタン (マッチカード内) ─ */
+.b-detail-row{padding:4px 8px;font-size:.6rem;color:rgba(255,215,0,.45);text-align:center;cursor:pointer;border-top:1px solid rgba(255,255,255,.06);letter-spacing:.5px;transition:all .15s;}
+.b-detail-row:hover{color:rgba(255,215,0,.9);background:rgba(255,215,0,.06);}
+
+/* ─ 結果詳細モーダル ─ */
+.rd-overlay{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+.rd-overlay.hidden{display:none;}
+.rd-box{background:#0d1e36;border:2px solid rgba(255,215,0,.45);border-radius:14px;padding:22px 24px;max-width:540px;width:100%;color:#fff;margin:auto 0;}
+.rd-box h3{color:var(--gold);font-weight:900;font-size:.95rem;text-align:center;margin-bottom:14px;}
+.rd-match-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.1);flex-wrap:wrap;}
+.rd-t1{color:#64b5f6;font-weight:900;font-size:.9rem;max-width:140px;text-align:right;word-break:break-all;}
+.rd-t2{color:#ef9a9a;font-weight:900;font-size:.9rem;max-width:140px;text-align:left;word-break:break-all;}
+.rd-mscore{background:rgba(0,0,0,.4);border:1.5px solid var(--gold);border-radius:8px;padding:5px 16px;text-align:center;}
+.rd-mscore-lbl{display:block;font-size:.58rem;color:rgba(255,215,0,.55);margin-bottom:1px;}
+.rd-mscore-val{font-size:1.5rem;font-weight:900;color:var(--gold);}
+/* セットパネル */
+.rd-set{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 11px;margin-bottom:7px;}
+.rd-set.rd-skipped{opacity:.35;}
+.rd-set-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap;}
+.rd-set-label{color:rgba(255,215,0,.85);font-size:.72rem;font-weight:900;flex-shrink:0;}
+.rd-badge{background:rgba(107,53,184,.55);border-radius:4px;padding:2px 7px;font-size:.63rem;color:#c4a8f0;font-weight:700;flex-shrink:0;}
+.rd-gscore{font-size:.75rem;font-weight:900;color:rgba(255,255,255,.65);margin-left:2px;}
+.rd-winner{font-size:.68rem;font-weight:700;margin-left:auto;}
+.rd-winner.t1{color:#64b5f6;}
+.rd-winner.t2{color:#ef9a9a;}
+.rd-winner.pend{color:rgba(255,255,255,.3);}
+.rd-skip{color:rgba(255,255,255,.3);font-size:.68rem;margin-left:auto;}
+/* メンバー表示 */
+.rd-members{display:flex;align-items:center;gap:6px;margin-bottom:7px;padding:5px 8px;background:rgba(255,255,255,.04);border-radius:5px;font-size:.68rem;flex-wrap:wrap;}
+.rd-members.koh{flex-direction:column;gap:3px;align-items:flex-start;}
+.rd-members.koh .rd-mvs{align-self:center;}
+.rd-mt1{color:#90caf9;font-weight:700;flex:1;text-align:right;}
+.rd-mt2{color:#ef9a9a;font-weight:700;flex:1;text-align:left;}
+.rd-mvs{color:rgba(255,255,255,.35);font-size:.65rem;flex-shrink:0;}
+/* ゲームドット */
+.rd-games-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.rd-game{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.rd-glbl{font-size:.58rem;color:rgba(255,255,255,.3);font-weight:700;}
+.rd-gdot{width:20px;height:20px;border-radius:50%;flex-shrink:0;}
+.rd-gdot.rd-dot-t1{background:#1565c0;box-shadow:0 0 6px rgba(21,101,192,.6);}
+.rd-gdot.rd-dot-t2{background:#c62828;box-shadow:0 0 6px rgba(198,40,40,.6);}
+.rd-close-btn{width:100%;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:transparent;color:rgba(255,255,255,.45);font-family:inherit;cursor:pointer;font-size:.8rem;margin-top:12px;}
+.rd-close-btn:hover{background:rgba(255,255,255,.06);}
+
+/* ─ Member modal ─ */
+.mem-overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.mem-overlay.hidden{display:none;}
+.mem-box{background:#0d1e36;border:2px solid rgba(255,215,0,.4);border-radius:14px;padding:24px;max-width:380px;width:100%;color:#fff;}
+.mem-box h3{color:var(--gold);font-size:1rem;font-weight:900;margin-bottom:14px;text-align:center;}
+.mem-row{display:flex;gap:6px;align-items:center;margin-bottom:7px;}
+.mem-num{font-size:.72rem;font-weight:700;color:rgba(255,215,0,.6);width:20px;flex-shrink:0;text-align:right;}
+.mem-inp{flex:1;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 10px;font-size:.84rem;font-family:inherit;color:#fff;font-weight:700;outline:none;}
+.mem-inp::placeholder{color:rgba(255,255,255,.35);font-weight:400;}
+.mem-inp:focus{border-color:var(--gold);background:rgba(255,255,255,.17);}
+.mem-del{background:none;border:none;color:#ef5350;font-size:1.1rem;cursor:pointer;padding:0 4px;}
+.mem-btn-row{display:flex;gap:8px;margin-top:12px;justify-content:center;flex-wrap:wrap;}
+.t-seed-mbtn{background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3);border-radius:6px;color:var(--gold);font-size:.65rem;cursor:pointer;padding:2px 7px;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+/* ─ Player selects in match modal ─ */
+.t-player-row{display:flex;gap:6px;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.1);}
+.t-player-sel{flex:1;font-size:.72rem;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:6px;padding:3px 5px;font-family:inherit;color:#ddd;max-width:calc(50% - 3px);}
+.t-player-sel:focus{outline:none;border-color:var(--gold);}
+/* ═══ スマホ最適化（768px以下） ═══ */
+@media(max-width:768px){
+  body{padding:10px 8px;}
+
+  /* ─ Header ─ */
+  .header{padding:12px 14px;gap:10px;}
+  .header-icon{font-size:1.6rem;}
+  .header-text h1{font-size:1.1rem;}
+  .header-text p{font-size:.7rem;}
+  .header-meta{margin-left:0;width:100%;}
+  .meta-box{padding:4px 10px;}
+  .meta-box .meta-val{font-size:.9rem;}
+
+  /* ─ Data bar ─ */
+  .data-bar{gap:7px;padding:8px 12px;}
+  .data-bar-info{width:100%;margin-left:0;text-align:right;}
+
+  /* ─ チーム登録グリッド ─ */
+  .tourney-players-grid{grid-template-columns:repeat(2,1fr);gap:6px;}
+  .t-seed-box{padding:6px 8px;}
+  .t-seed-input{font-size:.78rem;}
+  .t-seed-mbtn{font-size:.6rem;padding:2px 6px;}
+
+  /* ─ ツールバー ─ */
+  .tourney-toolbar{gap:6px;}
+  .tourney-status{font-size:.68rem;width:100%;margin-left:0;text-align:center;padding-top:4px;}
+
+  /* ─ トーナメント表：横スクロール ─ */
+  .tourney-wrap{padding:14px 10px;}
+  .bracket-flow{min-width:820px;}
+  .b-match{width:160px;}
+  .b-pname{max-width:130px;font-size:.72rem;}
+
+  /* ─ 試合結果モーダル ─ */
+  .t-result-modal{padding:12px 8px;}
+  .t-result-inner{padding:16px 14px;border-radius:10px;}
+  .t-result-inner h3{font-size:.88rem;margin-bottom:10px;}
+  .t-match-header{gap:8px;margin-bottom:12px;}
+  .t-team{font-size:.82rem;max-width:110px;}
+  .t-match-score-box{padding:4px 14px;}
+  .t-match-score-val{font-size:1.3rem;}
+
+  /* ─ セットパネル ─ */
+  .t-set-panel{padding:8px 10px;margin-bottom:6px;}
+  .t-set-top{flex-wrap:wrap;gap:5px;margin-bottom:7px;}
+  .t-set-label{font-size:.68rem;}
+  .t-set-type-badge{font-size:.6rem;padding:2px 6px;}
+  .t-set-result{font-size:.72rem;}
+
+  /* ─ ゲームボタン（タップしやすく） ─ */
+  .t-games-row{gap:8px;}
+  .tgb{min-width:52px;min-height:36px;font-size:.7rem;padding:6px 8px;}
+
+  /* ─ 選手選択 ─ */
+  .t-player-row{flex-direction:column;gap:5px;}
+  .t-player-sel{max-width:100%;width:100%;font-size:.75rem;padding:5px 6px;}
+
+  /* ─ 確定・キャンセルボタン ─ */
+  .t-confirm-btn{padding:12px;font-size:.85rem;}
+  .t-cancel-btn{padding:9px;font-size:.78rem;}
+
+  /* ─ メンバー登録モーダル ─ */
+  .mem-overlay{padding:12px;}
+  .mem-box{padding:18px 14px;}
+  .mem-inp{font-size:.8rem;padding:7px 9px;}
+
+  /* ─ 結果詳細モーダル ─ */
+  .rd-overlay{padding:12px 8px;}
+  .rd-box{padding:16px 14px;}
+  .rd-match-header{gap:8px;}
+  .rd-t1,.rd-t2{font-size:.82rem;max-width:110px;}
+  .rd-mscore-val{font-size:1.25rem;}
+  .rd-members{font-size:.65rem;}
+
+  /* ─ チャンピオンバナー ─ */
+  .champion-banner{padding:12px;}
+  .champion-banner .ch-name{font-size:1.3rem;}
+}
+
+/* ═══ 小型スマホ追加最適化（480px以下） ═══ */
+@media(max-width:480px){
+  body{padding:8px 6px;}
+  .header-text h1{font-size:.95rem;}
+  .header-text p{display:none;}
+
+  /* チーム登録を1列に */
+  .tourney-players-grid{grid-template-columns:1fr 1fr;}
+
+  /* ゲームボタンをさらに大きく */
+  .tgb{min-width:58px;min-height:40px;font-size:.68rem;}
+
+  /* モーダルをほぼ全画面に */
+  .t-result-inner{padding:14px 11px;}
+  .t-result-modal{padding:8px 4px;}
+
+  /* データバーのボタンをコンパクトに */
+  .btn-sm{padding:5px 9px;font-size:.7rem;}
+  .data-bar{gap:5px;}
+
+  /* セットパネルの余白を詰める */
+  .t-set-panel{padding:7px 8px;}
+  .t-games-row{gap:6px;}
+
+  /* KOH役職ラベルを短縮 */
+  .t-player-row span[style*="width:26px"]{width:22px!important;font-size:.55rem!important;}
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<div class="header">
+  <div class="header-icon">⚔️🏆✨</div>
+  <div class="header-text">
+    <h1>まほかく 最強サークル決定戦</h1>
+    <p>チーム戦 ｜ 5セット制（2vs2 × 2 ／ 1vs1 × 2 ／ KOH）｜ 3セット先取 ｜ シングルエリミネーション</p>
+  </div>
+  <div class="header-meta">
+    <div class="meta-box"><label>完了試合</label><div class="meta-val" id="hd-matches">0</div></div>
+  </div>
+</div>
+
+<div id="tourney-section"></div>
+
+<!-- 5-Set Match Modal -->
+<div class="t-result-modal hidden" id="t-modal">
+  <div class="t-result-inner">
+    <h3 id="t-modal-title">試合 結果入力</h3>
+    <div class="t-match-header">
+      <span class="t-team t-team1" id="t-p1-name">―</span>
+      <div class="t-match-score-box">
+        <span class="t-match-score-label">セット</span>
+        <span class="t-match-score-val" id="t-set-score">0 ― 0</span>
+      </div>
+      <span class="t-team t-team2" id="t-p2-name">―</span>
+    </div>
+    <div id="t-sets-container"></div>
+    <button class="t-confirm-btn" id="t-confirm-btn" onclick="confirmTMatch()" disabled>✅ 結果を確定する</button>
+    <button class="t-cancel-btn" onclick="closeTModal()">キャンセル</button>
+  </div>
+</div>
+
+<!-- ─ Member edit modal ─ -->
+<div class="mem-overlay hidden" id="mem-modal">
+  <div class="mem-box">
+    <h3 id="mem-title">メンバー登録</h3>
+    <div id="mem-inputs"></div>
+    <div class="mem-btn-row">
+      <button id="mem-add-btn" style="background:rgba(107,53,184,.4);border:1px solid var(--pur3);border-radius:8px;color:#fff;padding:6px 12px;font-family:inherit;cursor:pointer;font-size:.8rem;" onclick="addMemInput()">＋ メンバー追加</button>
+      <button style="background:linear-gradient(135deg,#2e7d32,#43a047);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-family:inherit;cursor:pointer;font-size:.8rem;font-weight:700;" onclick="saveMemberEdit()">✅ 保存</button>
+      <button style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#aaa;padding:6px 12px;font-family:inherit;cursor:pointer;font-size:.8rem;" onclick="closeMemberModal()">キャンセル</button>
+    </div>
+    <p style="font-size:.68rem;color:rgba(255,255,255,.3);text-align:center;margin-top:8px">4名〜9名まで登録できます</p>
+  </div>
+</div>
+<!-- ─ 結果詳細モーダル ─ -->
+<div class="rd-overlay hidden" id="rd-modal">
+  <div class="rd-box">
+    <h3 id="rd-title">結果詳細</h3>
+    <div class="rd-match-header">
+      <span class="rd-t1" id="rd-t1-name">―</span>
+      <div class="rd-mscore">
+        <span class="rd-mscore-lbl">セット</span>
+        <span class="rd-mscore-val" id="rd-match-score">0 ― 0</span>
+      </div>
+      <span class="rd-t2" id="rd-t2-name">―</span>
+    </div>
+    <div id="rd-sets-content"></div>
+    <button class="rd-close-btn" onclick="closeResultDetail()">✕ 閉じる</button>
+  </div>
+</div>
+
+<div class="data-bar">
+  <span class="data-bar-label">💾 データ管理</span>
+  <button class="btn btn-primary btn-sm" onclick="exportJSON()">📤 エクスポート</button>
+  <button class="btn btn-sm" style="background:#555;color:#fff;font-weight:700" onclick="document.getElementById('imp-file').click()">📥 インポート</button>
+  <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importJSON(event)">
+  <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 全リセット</button>
+  <span class="data-bar-info" id="last-saved">―</span>
+</div>
+
+<div class="footer">🏆 まほかく 最強サークル決定戦 ｜ チーム戦 5セット制 ｜ 自動保存</div>
+</div>
+
+<div id="save-indicator"><span class="dot"></span><span id="save-text">保存しました</span></div>
+
+<script>
+/* ═══════ CONSTANTS ═══════ */
+const SK = 'mahokaku_tourney_v3';
+
+// bo = max games per set, toWin = games needed to win the set
+const SET_DEFS = [
+  {label:'Set 1', type:'2vs2', bo:3, toWin:2},
+  {label:'Set 2', type:'2vs2', bo:3, toWin:2},
+  {label:'Set 3', type:'1vs1', bo:3, toWin:2},
+  {label:'Set 4', type:'1vs1', bo:3, toWin:2},
+  {label:'Set 5', type:'KOH',  bo:5, toWin:3},  // 勝ち抜き3本先取（最大5戦）
+];
+
+/* ═══════ STATE ═══════ */
+let tourney = { teams: Array(8).fill(''), members: Array(8).fill(null).map(()=>[]), results: {} };
+let tModalMid = null;
+let tModalSets = []; // working copy for current modal
+
+/* ═══════ MATCH LOGIC ═══════ */
+
+// First to toWin wins a set (Bo3: toWin=2, KOH: toWin=3)
+function computeSetWinner(games, toWin) {
+  const tw = toWin || 2;
+  const w0 = games.filter(x => x === 0).length;
+  const w1 = games.filter(x => x === 1).length;
+  if (w0 >= tw) return 0;
+  if (w1 >= tw) return 1;
+  return null;
+}
+
+// Running set score (stops counting after match decided)
+function getSetScores(r) {
+  if (!r || !r.sets) return { s0: 0, s1: 0 };
+  let s0 = 0, s1 = 0;
+  for (let i = 0; i < r.sets.length; i++) {
+    const def = SET_DEFS[i];
+    const sw = computeSetWinner(r.sets[i].games, def ? def.toWin : 2);
+    if (sw === 0) s0++;
+    else if (sw === 1) s1++;
+    if (s0 >= 3 || s1 >= 3) break;
+  }
+  return { s0, s1 };
+}
+
+// First to 3 sets wins the match
+function computeMatchWinner(r) {
+  if (!r || !r.sets) return null;
+  let s0 = 0, s1 = 0;
+  for (let i = 0; i < r.sets.length; i++) {
+    const def = SET_DEFS[i];
+    const sw = computeSetWinner(r.sets[i].games, def ? def.toWin : 2);
+    if (sw === 0) s0++;
+    else if (sw === 1) s1++;
+    if (s0 >= 3) return 0;
+    if (s1 >= 3) return 1;
+  }
+  return null;
+}
+
+/* ═══════ TOURNAMENT STRUCTURE (シングルエリミネーション) ═══════ */
+const TMATCH = {
+  u1: { label: 'QF 1',      p1: { t: 'seed', i: 0 }, p2: { t: 'seed', i: 7 } },
+  u2: { label: 'QF 2',      p1: { t: 'seed', i: 3 }, p2: { t: 'seed', i: 4 } },
+  u3: { label: 'QF 3',      p1: { t: 'seed', i: 1 }, p2: { t: 'seed', i: 6 } },
+  u4: { label: 'QF 4',      p1: { t: 'seed', i: 2 }, p2: { t: 'seed', i: 5 } },
+  u5: { label: 'SF 1',      p1: { t: 'winner', mid: 'u1' }, p2: { t: 'winner', mid: 'u2' } },
+  u6: { label: 'SF 2',      p1: { t: 'winner', mid: 'u3' }, p2: { t: 'winner', mid: 'u4' } },
+  gf: { label: '決勝',       p1: { t: 'winner', mid: 'u5' }, p2: { t: 'winner', mid: 'u6' } },
+};
+
+const TCONNS = [
+  { f: 'u1', ft: 'w', t: 'u5', ts: 'p1' },
+  { f: 'u2', ft: 'w', t: 'u5', ts: 'p2' },
+  { f: 'u3', ft: 'w', t: 'u6', ts: 'p1' },
+  { f: 'u4', ft: 'w', t: 'u6', ts: 'p2' },
+  { f: 'u5', ft: 'w', t: 'gf', ts: 'p1' },
+  { f: 'u6', ft: 'w', t: 'gf', ts: 'p2' },
+];
+
+/* ═══════ TOURNAMENT HELPERS ═══════ */
+function tGetR(mid) { return tourney.results[mid]; }
+function tGetW(mid) {
+  const r = tGetR(mid);
+  if (!r) return null;
+  return computeMatchWinner(r);
+}
+function tGetName(src) {
+  if (!src) return null;
+  if (src.t === 'seed') return tourney.teams[src.i] || null;
+  const w = tGetW(src.mid);
+  if (w == null) return null;
+  const m = TMATCH[src.mid];
+  return tGetName(src.t === 'winner' ? (w === 0 ? m.p1 : m.p2) : (w === 0 ? m.p2 : m.p1));
+}
+function tIsReady(mid) {
+  const m = TMATCH[mid];
+  return tGetName(m.p1) !== null && tGetName(m.p2) !== null;
+}
+function tGetChampion() {
+  const w = tGetW('gf');
+  if (w == null) return null;
+  const m = TMATCH['gf'];
+  return tGetName(w === 0 ? m.p1 : m.p2);
+}
+
+/* ═══════ MATCH CARD ═══════ */
+function tMatchCard(mid) {
+  const m = TMATCH[mid];
+  const n1 = tGetName(m.p1) || 'TBD';
+  const n2 = tGetName(m.p2) || 'TBD';
+  const r  = tGetR(mid);
+  const w  = tGetW(mid);
+  const ready = tIsReady(mid);
+  const champ = tGetChampion();
+  const { s0, s1 } = getSetScores(r);
+  const isGF = mid === 'gf';
+
+  // p1=青(ub), p2=赤(lb) を基本色として使用
+  function slotCls(isP1, isWinner) {
+    const base    = isP1 ? 'bs-ub'      : 'bs-lb';
+    const baseTbd = 'bs-tbd';
+    const baseLose = isP1 ? 'bs-lose-ub' : 'bs-lose-lb';
+    const name = isP1 ? n1 : n2;
+    if (w == null) return (name === 'TBD' ? baseTbd : base);
+    if (isWinner) {
+      if (isGF) return 'bs-champ';
+      return base;
+    }
+    return baseLose;
+  }
+  const cls1 = slotCls(true,  w === 0);
+  const cls2 = slotCls(false, w === 1);
+
+  const bCls = isGF ? ' bm-gf' : '';
+  const onclick = ready && w == null
+    ? 'onclick="openTMatch(\'' + mid + '\')" style="cursor:pointer"'
+    : (w != null ? 'onclick="resetTMatch(\'' + mid + '\')" title="クリックでリセット" style="cursor:pointer"' : '');
+
+  const icon1 = isGF && w === 0 ? '🏆 ' : '';
+  const icon2 = isGF && w === 1 ? '🏆 ' : '';
+  const sc1 = r ? '<span class="b-score">' + s0 + '</span>' : '';
+  const sc2 = r ? '<span class="b-score">' + s1 + '</span>' : '';
+
+  // 結果が保存されている場合のみ詳細ボタン表示
+  const detailRow = r
+    ? '<div class="b-detail-row" onclick="event.stopPropagation();openResultDetail(\'' + mid + '\')">📋 セット詳細を見る</div>'
+    : '';
+
+  return '<div class="b-match' + bCls + '" id="bm-' + mid + '" ' + onclick + '>'
+    + '<div class="b-match-num">' + m.label + ' <span style="opacity:.4;font-size:.52rem">5セット制</span></div>'
+    + '<div class="b-slot ' + cls1 + '" id="bp1-' + mid + '"><span class="b-pname">' + icon1 + esc(n1) + '</span>' + sc1 + '</div>'
+    + '<div class="b-slot-sep"></div>'
+    + '<div class="b-slot ' + cls2 + '" id="bp2-' + mid + '"><span class="b-pname">' + icon2 + esc(n2) + '</span>' + sc2 + '</div>'
+    + detailRow
+    + '</div>';
+}
+
+/* ═══════ MATCH MODAL ═══════ */
+function openTMatch(mid) {
+  const m = TMATCH[mid];
+  tModalMid = mid;
+  const existing = tGetR(mid);
+  tModalSets = existing
+    ? existing.sets.map((s, i) => ({
+        games: s.games.length === SET_DEFS[i].bo ? [...s.games] : Array(SET_DEFS[i].bo).fill(null).map((_, j) => s.games[j] ?? null),
+        players: (s.players && !Array.isArray(s.players)) ? {...s.players}
+                 : (Array.isArray(s.players) && s.players[0] ? {...s.players[0]} : {})
+      }))
+    : SET_DEFS.map(def => ({ games: Array(def.bo).fill(null), players: {} }));
+
+  document.getElementById('t-modal-title').textContent = m.label + ' — 結果入力';
+  document.getElementById('t-p1-name').textContent = tGetName(m.p1) || '?';
+  document.getElementById('t-p2-name').textContent = tGetName(m.p2) || '?';
+  renderTModal();
+  document.getElementById('t-modal').classList.remove('hidden');
+}
+
+function closeTModal() {
+  document.getElementById('t-modal').classList.add('hidden');
+  tModalMid = null;
+  tModalSets = [];
+}
+
+function renderTModal() {
+  const n1 = tModalMid ? (tGetName(TMATCH[tModalMid].p1) || 'チーム1') : 'チーム1';
+  const n2 = tModalMid ? (tGetName(TMATCH[tModalMid].p2) || 'チーム2') : 'チーム2';
+  const sn1 = n1.length > 10 ? n1.slice(0, 10) + '…' : n1;
+  const sn2 = n2.length > 10 ? n2.slice(0, 10) + '…' : n2;
+
+  // Running set score (from working copy)
+  let rs0 = 0, rs1 = 0;
+  for (let i = 0; i < tModalSets.length; i++) {
+    const sw = computeSetWinner(tModalSets[i].games, SET_DEFS[i].toWin);
+    if (sw === 0) rs0++;
+    else if (sw === 1) rs1++;
+    if (rs0 >= 3 || rs1 >= 3) break;
+  }
+  document.getElementById('t-set-score').textContent = rs0 + ' ― ' + rs1;
+
+  const container = document.getElementById('t-sets-container');
+  let html = '';
+  let matchDecided = false;
+  let tmpS0 = 0, tmpS1 = 0;
+
+  // チームメンバーリスト（全セット共通）
+  const t1idx = tModalMid ? getTeamSeedIdx(tGetName(TMATCH[tModalMid].p1)) : -1;
+  const t2idx = tModalMid ? getTeamSeedIdx(tGetName(TMATCH[tModalMid].p2)) : -1;
+  const t1mems = (t1idx >= 0 && tourney.members[t1idx] && tourney.members[t1idx].length)
+    ? tourney.members[t1idx] : [];
+  const t2mems = (t2idx >= 0 && tourney.members[t2idx] && tourney.members[t2idx].length)
+    ? tourney.members[t2idx] : [];
+
+  // disabled対応mkOpts（disabledValsに含まれる選手は選択不可として表示）
+  function mkOpts(mems, saved, disabledVals) {
+    disabledVals = disabledVals || [];
+    return '<option value="">― 選手 ―</option>'
+      + mems.map(function(m) {
+        var dis = disabledVals.indexOf(m) >= 0;
+        return '<option value="' + esc(m) + '"'
+          + (saved === m ? ' selected' : '')
+          + (dis
+              ? ' disabled style="color:rgba(255,255,255,.25);font-weight:400;"'
+              : ' style="color:#111;font-weight:700;"')
+          + '>' + esc(m) + (dis ? ' ✗' : '') + '</option>';
+      }).join('');
+  }
+
+  // ※ setAppearance は overLimit 計算をセットループ内で直接行うため不要
+
+  for (let si = 0; si < SET_DEFS.length; si++) {
+    const def = SET_DEFS[si];
+    const set = tModalSets[si];
+    const sw  = computeSetWinner(set.games, def.toWin);
+    const isLocked = matchDecided;
+    const isKOH = def.type === 'KOH';
+    const is2v2 = def.type === '2vs2';
+    const savedPlayers = tModalSets[si].players || {};
+
+    // Game gi is enabled if set not yet decided by previous games
+    function gameEnabled(gi) {
+      if (isLocked) return false;
+      let w0 = 0, w1 = 0;
+      for (let j = 0; j < gi; j++) {
+        if (set.games[j] === 0) w0++;
+        else if (set.games[j] === 1) w1++;
+      }
+      return w0 < def.toWin && w1 < def.toWin;
+    }
+
+    // Result label
+    let swLabel = '';
+    if      (sw === 0) swLabel = '<span class="t-set-result w0">' + esc(n1) + ' WIN</span>';
+    else if (sw === 1) swLabel = '<span class="t-set-result w1">' + esc(n2) + ' WIN</span>';
+    else               swLabel = '<span class="t-set-result pending">未決定</span>';
+
+    // KOH internal score
+    let kohScoreHtml = '';
+    if (isKOH) {
+      const kw0 = set.games.filter(x => x === 0).length;
+      const kw1 = set.games.filter(x => x === 1).length;
+      kohScoreHtml = '<span style="margin-left:auto;font-size:.7rem;color:rgba(255,255,255,.45);">'
+        + kw0 + ' 勝 ― ' + kw1 + ' 勝</span>';
+    }
+
+    // Badge label
+    const badgeText = isKOH ? 'KOH 勝ち抜き 3本先取' : def.type;
+
+    // ─ 出場制限（Set 1〜4のみ） ─
+    // ルール①：合計2セットまで
+    // ルール②：2vs2セット（Set1・2）は1回まで、1vs1セット（Set3・4）は1回まで
+    var overLimit = [];
+    if (si < 4) {
+      var curType = def.type; // '2vs2' or '1vs1'
+      var totalOtherCount = {};    // 他のセット全体での出場数
+      var sameTypeOtherCount = {}; // 他の同タイプセットでの出場数
+      for (var s3i = 0; s3i < 4; s3i++) {
+        if (s3i === si) continue; // 現セットはスキップ
+        var p3 = tModalSets[s3i].players || {};
+        var seen3 = {};
+        [p3.t1a, p3.t1b, p3.t2a, p3.t2b].forEach(function(nm) {
+          if (nm && !seen3[nm]) {
+            seen3[nm] = true;
+            totalOtherCount[nm] = (totalOtherCount[nm] || 0) + 1;
+            if (SET_DEFS[s3i].type === curType) {
+              sameTypeOtherCount[nm] = (sameTypeOtherCount[nm] || 0) + 1;
+            }
+          }
+        });
+      }
+      var limitedMap = {};
+      // ルール①：他セットで2回以上 → 全体上限超過
+      Object.keys(totalOtherCount).forEach(function(nm) {
+        if (totalOtherCount[nm] >= 2) limitedMap[nm] = true;
+      });
+      // ルール②：同タイプの他セットで1回以上 → 同タイプ上限超過
+      Object.keys(sameTypeOtherCount).forEach(function(nm) {
+        if (sameTypeOtherCount[nm] >= 1) limitedMap[nm] = true;
+      });
+      overLimit = Object.keys(limitedMap);
+    }
+
+    // ─ 選手選択セクション ─
+    let playerSectionHtml = '';
+    if (t1mems.length || t2mems.length) {
+      playerSectionHtml += '<div style="margin-bottom:8px;padding:7px 8px;background:rgba(255,255,255,.04);border-radius:6px;border:1px dashed rgba(255,255,255,.1);">';
+      playerSectionHtml += '<div style="font-size:.62rem;color:rgba(255,215,0,.5);margin-bottom:5px;font-weight:700;">出場メンバー（このセット固定）</div>';
+      if (is2v2) {
+        // 同セット同チーム内で同一人物不可 + 2セット制限
+        var t1aDis = overLimit.concat(savedPlayers.t1b ? [savedPlayers.t1b] : []);
+        var t1bDis = overLimit.concat(savedPlayers.t1a ? [savedPlayers.t1a] : []);
+        var t2aDis = overLimit.concat(savedPlayers.t2b ? [savedPlayers.t2b] : []);
+        var t2bDis = overLimit.concat(savedPlayers.t2a ? [savedPlayers.t2a] : []);
+        playerSectionHtml += '<div class="t-player-row">';
+        playerSectionHtml += '<select class="t-player-sel" id="ps_' + si + '_t1a" title="' + esc(n1) + ' 選手1" onchange="onPlayerSelChange()">'
+          + mkOpts(t1mems, savedPlayers.t1a, t1aDis) + '</select>';
+        playerSectionHtml += '<select class="t-player-sel" id="ps_' + si + '_t2a" title="' + esc(n2) + ' 選手1" onchange="onPlayerSelChange()">'
+          + mkOpts(t2mems, savedPlayers.t2a, t2aDis) + '</select>';
+        playerSectionHtml += '</div><div class="t-player-row">';
+        playerSectionHtml += '<select class="t-player-sel" id="ps_' + si + '_t1b" title="' + esc(n1) + ' 選手2" onchange="onPlayerSelChange()">'
+          + mkOpts(t1mems, savedPlayers.t1b, t1bDis) + '</select>';
+        playerSectionHtml += '<select class="t-player-sel" id="ps_' + si + '_t2b" title="' + esc(n2) + ' 選手2" onchange="onPlayerSelChange()">'
+          + mkOpts(t2mems, savedPlayers.t2b, t2bDis) + '</select>';
+        playerSectionHtml += '</div>';
+      } else if (isKOH) {
+        // KOH: 先鋒・中峰・大将の3人登録（同チーム内で同一人物不可）
+        var kohPos = ['先鋒', '中峰', '大将'];
+        var t1Keys = ['t1a', 't1b', 't1c'];
+        var t2Keys = ['t2a', 't2b', 't2c'];
+        kohPos.forEach(function(pos, pi) {
+          var t1k = t1Keys[pi];
+          var t2k = t2Keys[pi];
+          // 同チームの他ポジション選手を disabled に
+          var t1Sibs = t1Keys.filter(function(_, i){ return i !== pi; }).map(function(k){ return savedPlayers[k]; }).filter(Boolean);
+          var t2Sibs = t2Keys.filter(function(_, i){ return i !== pi; }).map(function(k){ return savedPlayers[k]; }).filter(Boolean);
+          playerSectionHtml += '<div class="t-player-row" style="align-items:center;gap:4px;">';
+          playerSectionHtml += '<span style="font-size:.6rem;font-weight:900;color:rgba(255,215,0,.7);width:26px;flex-shrink:0;text-align:center;">' + pos + '</span>';
+          playerSectionHtml += '<select class="t-player-sel" id="ps_' + si + '_' + t1k + '" title="' + esc(n1) + ' ' + pos + '" onchange="onPlayerSelChange()">'
+            + mkOpts(t1mems, savedPlayers[t1k], t1Sibs) + '</select>';
+          playerSectionHtml += '<select class="t-player-sel" id="ps_' + si + '_' + t2k + '" title="' + esc(n2) + ' ' + pos + '" onchange="onPlayerSelChange()">'
+            + mkOpts(t2mems, savedPlayers[t2k], t2Sibs) + '</select>';
+          playerSectionHtml += '</div>';
+        });
+      } else {
+        // 1vs1: 1人ずつ、2セット制限のみ適用
+        playerSectionHtml += '<div class="t-player-row">';
+        playerSectionHtml += '<select class="t-player-sel" id="ps_' + si + '_t1a" title="' + esc(n1) + ' 選手" onchange="onPlayerSelChange()">'
+          + mkOpts(t1mems, savedPlayers.t1a, overLimit) + '</select>';
+        playerSectionHtml += '<select class="t-player-sel" id="ps_' + si + '_t2a" title="' + esc(n2) + ' 選手" onchange="onPlayerSelChange()">'
+          + mkOpts(t2mems, savedPlayers.t2a, overLimit) + '</select>';
+        playerSectionHtml += '</div>';
+      }
+      playerSectionHtml += '</div>';
+    }
+
+    html += '<div class="t-set-panel' + (isLocked ? ' locked' : '') + '">'
+      + '<div class="t-set-top">'
+      + '<span class="t-set-label">' + def.label + '</span>'
+      + '<span class="t-set-type-badge">' + badgeText + '</span>'
+      + swLabel
+      + kohScoreHtml
+      + '</div>'
+      + playerSectionHtml
+      + '<div class="t-games-row">';
+
+    for (let gi = 0; gi < def.bo; gi++) {
+      const gval = set.games[gi];
+      const enabled = gameEnabled(gi);
+      const gDis = !enabled || (sw !== null && gval === null);
+      const gameLbl = isKOH ? ('第' + (gi + 1) + '戦') : ('G' + (gi + 1));
+      html += '<div class="t-game-block">'
+        + '<div class="t-game-lbl">' + gameLbl + '</div>'
+        + '<div class="t-gbtn-row">'
+        + '<button class="tgb' + (gval === 0 ? ' act-t1' : '') + (gDis ? ' dis' : '')
+          + '" onclick="setTGame(' + si + ',' + gi + ',0)">' + esc(sn1) + '</button>'
+        + '<button class="tgb' + (gval === 1 ? ' act-t2' : '') + (gDis ? ' dis' : '')
+          + '" onclick="setTGame(' + si + ',' + gi + ',1)">' + esc(sn2) + '</button>'
+        + '</div>'
+        + '</div>';
+    }
+    html += '</div></div>';
+
+    // Track match score to decide if next sets are locked
+    if (sw === 0) tmpS0++;
+    else if (sw === 1) tmpS1++;
+    if (tmpS0 >= 3 || tmpS1 >= 3) matchDecided = true;
+  }
+
+  container.innerHTML = html;
+
+  // Enable save button whenever any game has been entered (partial saves OK)
+  const hasData = tModalSets.some(s => s.games.some(g => g !== null));
+  const winner  = computeMatchWinner({ sets: tModalSets });
+  const btn = document.getElementById('t-confirm-btn');
+  btn.disabled = !hasData;
+  btn.textContent = winner !== null ? '✅ 結果を確定する' : '💾 途中経過を保存する';
+}
+
+// プレイヤー選択をDOMから読み取ってstateに保存
+function saveDomPlayersToState() {
+  for (var s2i = 0; s2i < SET_DEFS.length; s2i++) {
+    var def2 = SET_DEFS[s2i];
+    var is2v2b = def2.type === '2vs2';
+    var isKOH2 = def2.type === 'KOH';
+    var chk = function(id) { var el = document.getElementById('ps_' + s2i + '_' + id); return el ? el.value : null; };
+    if (chk('t1a') === null) continue; // このセットの選択欄が未描画
+    if (is2v2b) {
+      tModalSets[s2i].players = { t1a: chk('t1a')||'', t1b: chk('t1b')||'', t2a: chk('t2a')||'', t2b: chk('t2b')||'' };
+    } else if (isKOH2) {
+      tModalSets[s2i].players = { t1a: chk('t1a')||'', t1b: chk('t1b')||'', t1c: chk('t1c')||'', t2a: chk('t2a')||'', t2b: chk('t2b')||'', t2c: chk('t2c')||'' };
+    } else {
+      tModalSets[s2i].players = { t1a: chk('t1a')||'', t2a: chk('t2a')||'' };
+    }
+  }
+}
+
+// プレイヤー選択変更時: stateに保存してから再描画（制約を更新）
+function onPlayerSelChange() {
+  saveDomPlayersToState();
+  renderTModal();
+}
+
+function setTGame(si, gi, team) {
+  saveDomPlayersToState(); // 再描画前に選手選択を保持
+  const def = SET_DEFS[si];
+  const set = tModalSets[si];
+  // Toggle: click same button = unselect
+  set.games[gi] = (set.games[gi] === team) ? null : team;
+  // Clear games beyond the set decision point (works for any bo/toWin)
+  let w0 = 0, w1 = 0;
+  for (let i = 0; i < def.bo; i++) {
+    if (w0 >= def.toWin || w1 >= def.toWin) {
+      set.games[i] = null;
+    } else {
+      if (set.games[i] === 0) w0++;
+      else if (set.games[i] === 1) w1++;
+    }
+  }
+  renderTModal();
+}
+
+function confirmTMatch() {
+  if (tModalMid === null) return;
+  // Collect player selections from DOM (one set of selects per set)
+  const setsWithPlayers = tModalSets.map((s, si) => {
+    const def = SET_DEFS[si];
+    const is2v2 = def.type === '2vs2';
+    const isKOH = def.type === 'KOH';
+    const get = id => { const el = document.getElementById('ps_' + si + '_' + id); return el ? el.value : ''; };
+    let players;
+    if (is2v2) {
+      players = { t1a: get('t1a'), t1b: get('t1b'), t2a: get('t2a'), t2b: get('t2b') };
+    } else if (isKOH) {
+      players = { t1a: get('t1a'), t1b: get('t1b'), t1c: get('t1c'), t2a: get('t2a'), t2b: get('t2b'), t2c: get('t2c') };
+    } else {
+      players = { t1a: get('t1a'), t2a: get('t2a') };
+    }
+    return { games: [...s.games], players };
+  });
+  tourney.results[tModalMid] = { sets: setsWithPlayers };
+  closeTModal();
+  renderTournament();
+  saveAll();
+}
+
+function resetTMatch(mid) {
+  if (!confirm(TMATCH[mid].label + ' の結果をリセットしますか？')) return;
+  // Find and delete dependent matches
+  const deps = [];
+  function findDeps(id) {
+    Object.keys(TMATCH).forEach(function (k) {
+      if (k === id) return;
+      const mm = TMATCH[k];
+      if ([mm.p1, mm.p2].some(function (s) { return s && s.mid === id; }) && !deps.includes(k)) {
+        deps.push(k); findDeps(k);
+      }
+    });
+  }
+  findDeps(mid);
+  [mid].concat(deps).forEach(function (id) { delete tourney.results[id]; });
+  renderTournament();
+  saveAll();
+}
+
+/* ═══════ RESULT DETAIL ═══════ */
+function openResultDetail(mid) {
+  const m = TMATCH[mid];
+  const r = tGetR(mid);
+  if (!r) return;
+  const n1 = tGetName(m.p1) || '?';
+  const n2 = tGetName(m.p2) || '?';
+  const { s0, s1 } = getSetScores(r);
+
+  function sn(name) { return name.length > 8 ? name.slice(0, 8) + '…' : name; }
+
+  let content = '';
+  let tmpS0 = 0, tmpS1 = 0;
+
+  for (let si = 0; si < SET_DEFS.length; si++) {
+    const def = SET_DEFS[si];
+    const set = r.sets[si] || { games: [], players: {} };
+    const isKOH = def.type === 'KOH';
+    const isSkipped = tmpS0 >= 3 || tmpS1 >= 3;
+
+    if (isSkipped) {
+      content += '<div class="rd-set rd-skipped">'
+        + '<div class="rd-set-top">'
+        + '<span class="rd-set-label">' + def.label + '</span>'
+        + '<span class="rd-badge">' + (isKOH ? 'KOH' : def.type) + '</span>'
+        + '<span class="rd-skip">— 実施なし</span>'
+        + '</div></div>';
+      continue;
+    }
+
+    const sw = computeSetWinner(set.games || [], def.toWin);
+    const games = set.games || [];
+
+    // ゲームスコア（有効なゲームのみカウント）
+    let gw0 = 0, gw1 = 0, valid0 = 0, valid1 = 0;
+    for (let gi = 0; gi < def.bo; gi++) {
+      const g = games[gi];
+      if (g === null || g === undefined) continue;
+      if (g === 0) gw0++;
+      else gw1++;
+    }
+
+    // ゲームドット
+    let dotsHtml = '';
+    for (let gi = 0; gi < def.bo; gi++) {
+      const g = games[gi];
+      if (g === null || g === undefined) continue;
+      const lbl = isKOH ? ('第' + (gi + 1) + '戦') : ('G' + (gi + 1));
+      const cls = g === 0 ? 'rd-dot-t1' : 'rd-dot-t2';
+      dotsHtml += '<span class="rd-game">'
+        + '<span class="rd-glbl">' + lbl + '</span>'
+        + '<span class="rd-gdot ' + cls + '"></span>'
+        + '</span>';
+    }
+
+    // セット勝者ラベル
+    const winLbl = sw === 0
+      ? '<span class="rd-winner t1">▶ ' + esc(sn(n1)) + ' 勝利</span>'
+      : sw === 1
+      ? '<span class="rd-winner t2">▶ ' + esc(sn(n2)) + ' 勝利</span>'
+      : '<span class="rd-winner pend">途中保存</span>';
+
+    // 出場メンバー
+    const p = set.players || {};
+    const hasPlayers = Object.values(p).some(function(v){ return v; });
+    let pHtml = '';
+    if (hasPlayers) {
+      if (def.type === '2vs2') {
+        const t1p = [p.t1a, p.t1b].filter(Boolean).join(' / ');
+        const t2p = [p.t2a, p.t2b].filter(Boolean).join(' / ');
+        if (t1p || t2p) {
+          pHtml = '<div class="rd-members">'
+            + '<span class="rd-mt1">' + esc(t1p || '―') + '</span>'
+            + '<span class="rd-mvs">vs</span>'
+            + '<span class="rd-mt2">' + esc(t2p || '―') + '</span>'
+            + '</div>';
+        }
+      } else if (def.type === '1vs1') {
+        if (p.t1a || p.t2a) {
+          pHtml = '<div class="rd-members">'
+            + '<span class="rd-mt1">' + esc(p.t1a || '―') + '</span>'
+            + '<span class="rd-mvs">vs</span>'
+            + '<span class="rd-mt2">' + esc(p.t2a || '―') + '</span>'
+            + '</div>';
+        }
+      } else if (isKOH) {
+        const pos = ['先鋒', '中峰', '大将'];
+        const t1p = ['t1a','t1b','t1c'].map(function(k,i){ return p[k] ? pos[i]+':'+p[k] : ''; }).filter(Boolean).join('　');
+        const t2p = ['t2a','t2b','t2c'].map(function(k,i){ return p[k] ? pos[i]+':'+p[k] : ''; }).filter(Boolean).join('　');
+        if (t1p || t2p) {
+          pHtml = '<div class="rd-members koh">'
+            + '<span class="rd-mt1" style="text-align:left;">' + esc(t1p || '―') + '</span>'
+            + '<span class="rd-mvs">vs</span>'
+            + '<span class="rd-mt2" style="text-align:left;">' + esc(t2p || '―') + '</span>'
+            + '</div>';
+        }
+      }
+    }
+
+    content += '<div class="rd-set">'
+      + '<div class="rd-set-top">'
+      + '<span class="rd-set-label">' + def.label + '</span>'
+      + '<span class="rd-badge">' + (isKOH ? 'KOH 勝ち抜き' : def.type) + '</span>'
+      + '<span class="rd-gscore">' + gw0 + ' ― ' + gw1 + '</span>'
+      + winLbl
+      + '</div>'
+      + pHtml
+      + '<div class="rd-games-row">' + dotsHtml + '</div>'
+      + '</div>';
+
+    if (sw === 0) tmpS0++;
+    else if (sw === 1) tmpS1++;
+  }
+
+  document.getElementById('rd-title').textContent = m.label + ' — 結果詳細';
+  document.getElementById('rd-t1-name').textContent = n1;
+  document.getElementById('rd-t2-name').textContent = n2;
+  document.getElementById('rd-match-score').textContent = s0 + ' ― ' + s1;
+  document.getElementById('rd-sets-content').innerHTML = content;
+  document.getElementById('rd-modal').classList.remove('hidden');
+}
+
+function closeResultDetail() {
+  document.getElementById('rd-modal').classList.add('hidden');
+}
+
+/* ═══════ RENDER TOURNAMENT ═══════ */
+function renderTournament() {
+  const el    = document.getElementById('tourney-section');
+  const champ = tGetChampion();
+
+  let h = '<div style="margin-bottom:16px">';
+
+  // Champion banner
+  if (champ) {
+    h += '<div class="champion-banner">'
+       + '<div class="ch-title">🏆 CHAMPION 🏆</div>'
+       + '<div class="ch-name">' + esc(champ) + '</div>'
+       + '</div>';
+  }
+
+  // Team registration
+  h += '<div class="tourney-wrap" style="margin-bottom:14px">'
+     + '<div class="tourney-section-label">🎯 チーム登録</div>'
+     + '<div class="tourney-players-grid">';
+  for (let i = 0; i < 8; i++) {
+    const mc = (tourney.members[i] && tourney.members[i].length) ? tourney.members[i].length + '人' : '未登録';
+    h += '<div class="t-seed-box">'
+       + '<span class="t-seed-num">' + (i + 1) + '.</span>'
+       + '<input class="t-seed-input" type="text" placeholder="チーム名" maxlength="17"'
+       + ' value="' + esc(tourney.teams[i] || '') + '"'
+       + ' oninput="tourney.teams[' + i + ']=this.value;"'
+       + ' onblur="renderTournament();saveAll();">'
+       + '<button class="t-seed-mbtn" onclick="openMemberEdit(' + i + ')">👥' + mc + '</button>'
+       + '</div>';
+  }
+  h += '</div>'
+     + '<div class="tourney-toolbar">'
+     + '<button class="btn btn-danger btn-sm" onclick="resetAllTourney()">🗑 トーナメントリセット</button>'
+     + '<span class="tourney-status">▶ 試合をクリック → 結果入力 ／ 確定済みをクリック → リセット</span>'
+     + '</div></div>';
+
+  // Main bracket (シングルエリミネーション)
+  h += '<div class="tourney-wrap" id="bracket-main">'
+     + '<div class="bracket-flow">'
+
+     // QF列：4試合を均等配置
+     + '<div class="b-col">'
+     + '<div class="b-col-hdr">QUARTERFINALS</div>'
+     + '<div class="b-matches">'
+     + tMatchCard('u1')
+     + tMatchCard('u2')
+     + tMatchCard('u3')
+     + tMatchCard('u4')
+     + '</div></div>'
+
+     // SF列：2試合を均等配置（各QFペアの中央に来る）
+     + '<div class="b-col">'
+     + '<div class="b-col-hdr">SEMIFINALS</div>'
+     + '<div class="b-matches">'
+     + tMatchCard('u5')
+     + tMatchCard('u6')
+     + '</div></div>'
+
+     // 決勝列
+     + '<div class="b-col">'
+     + '<div class="b-col-hdr">決勝</div>'
+     + '<div class="b-matches">'
+     + tMatchCard('gf')
+     + '</div></div>'
+
+     + '</div></div>';
+
+  h += '</div>';
+
+  el.innerHTML = h;
+  updateHd();
+  requestAnimationFrame(function () { drawBracketSVG(); });
+}
+
+/* ═══════ SVG BRACKET LINES ═══════ */
+function drawBracketSVG() {
+  const container = document.getElementById('bracket-main');
+  if (!container) return;
+  let svg = document.getElementById('bracket-svg');
+  if (svg) svg.remove();
+  const W = container.offsetWidth, H = container.offsetHeight;
+  svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.id = 'bracket-svg';
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;z-index:0;';
+  container.prepend(svg);
+  const cr = container.getBoundingClientRect();
+
+  function midOf(el) {
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return {
+      right: r.right - cr.left, left: r.left - cr.left,
+      cy: r.top - cr.top + r.height / 2
+    };
+  }
+
+  TCONNS.forEach(function (c) {
+    const fromEl    = document.getElementById('bm-' + c.f);
+    const toSlotEl  = document.getElementById('b' + c.ts + '-' + c.t);
+    if (!fromEl || !toSlotEl) return;
+    const from = midOf(fromEl), to = midOf(toSlotEl);
+    if (!from || !to) return;
+
+    const x1 = from.right, y1 = from.cy;
+    const x2 = to.left,    y2 = to.cy;
+    const w  = tGetW(c.f);
+    const active = w != null;
+    // 勝者ライン: 勝ったチームが次の枠へ
+    const isWinPath = active && c.ft === 'w' && (
+      (w === 0 && c.ts === 'p1') ||
+      (w === 1 && c.ts === 'p2')
+    );
+    // 敗者ライン（3位決定戦へ）: 負けたチームが次の枠へ
+    const isLosePath = active && c.ft === 'l' && (
+      (w === 1 && c.ts === 'p1') ||
+      (w === 0 && c.ts === 'p2')
+    );
+    const champ = tGetChampion();
+    let champPath = false;
+    if (isWinPath && champ) {
+      const fw = tGetW(c.f);
+      const fm = TMATCH[c.f];
+      const fslot = fw === 0 ? fm.p1 : fm.p2;
+      champPath = tGetName(fslot) === champ;
+    }
+
+    let color, width, dash = '';
+    if      (!active)    { color = 'rgba(255,255,255,0.1)';    width = 1;   dash = '4,4'; }
+    else if (champPath)  { color = 'rgba(255,210,30,0.98)';    width = 4; }
+    else if (isWinPath)  { color = 'rgba(100,181,246,0.9)';    width = 3; }
+    else if (isLosePath) { color = 'rgba(205,160,80,0.75)';    width = 2;   dash = '5,3'; }
+    else                 { color = 'rgba(255,255,255,0.22)';   width = 1.5; dash = '3,3'; }
+
+    const mx = (x1 + x2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M' + x1 + ',' + y1 + ' L' + mx + ',' + y1 + ' L' + mx + ',' + y2 + ' L' + x2 + ',' + y2);
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', width);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    if (dash) path.setAttribute('stroke-dasharray', dash);
+    svg.appendChild(path);
+
+    if (active) {
+      const arr = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      arr.setAttribute('points', x2 + ',' + y2 + ' ' + (x2 - 6) + ',' + (y2 - 3) + ' ' + (x2 - 6) + ',' + (y2 + 3));
+      arr.setAttribute('fill', color);
+      svg.appendChild(arr);
+    }
+  });
+}
+
+/* ═══════ MEMBER EDIT ═══════ */
+function getTeamSeedIdx(teamName) {
+  if (!teamName) return -1;
+  return tourney.teams.findIndex(t => t === teamName);
+}
+let memEditIdx = null;
+function openMemberEdit(idx) {
+  memEditIdx = idx;
+  const name = tourney.teams[idx] || ('チーム ' + (idx + 1));
+  document.getElementById('mem-title').textContent = name + ' — メンバー登録';
+  const list = (tourney.members[idx] && tourney.members[idx].length >= 4)
+    ? [...tourney.members[idx]] : ['','','',''];
+  renderMemInputs(list);
+  document.getElementById('mem-modal').classList.remove('hidden');
+}
+function renderMemInputs(list) {
+  const c = document.getElementById('mem-inputs');
+  c.innerHTML = list.map((m, i) =>
+    '<div class="mem-row">'
+    + '<span class="mem-num">' + (i+1) + '.</span>'
+    + '<input class="mem-inp" type="text" placeholder="選手名" value="' + esc(m) + '" id="mi-' + i + '">'
+    + (i >= 4 ? '<button class="mem-del" onclick="removeMemRow(' + i + ')">×</button>' : '')
+    + '</div>'
+  ).join('');
+  document.getElementById('mem-add-btn').style.display = list.length >= 9 ? 'none' : '';
+}
+function addMemInput() {
+  const vals = getMemValues();
+  if (vals.length >= 9) return;
+  renderMemInputs([...vals, '']);
+}
+function removeMemRow(idx) {
+  const vals = getMemValues();
+  vals.splice(idx, 1);
+  renderMemInputs(vals);
+}
+function getMemValues() {
+  return Array.from(document.querySelectorAll('#mem-inputs .mem-inp')).map(x => x.value.trim());
+}
+function saveMemberEdit() {
+  const members = getMemValues().filter(m => m.length > 0);
+  if (members.length < 4) { alert('メンバーは最低4名登録してください（現在' + members.length + '名）'); return; }
+  tourney.members[memEditIdx] = members;
+  document.getElementById('mem-modal').classList.add('hidden');
+  memEditIdx = null;
+  renderTournament(); saveAll();
+}
+function closeMemberModal() {
+  document.getElementById('mem-modal').classList.add('hidden');
+  memEditIdx = null;
+}
+
+/* ═══════ HELPERS ═══════ */
+function esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function updateHd() {
+  const done = Object.values(tourney.results).filter(r => computeMatchWinner(r) !== null).length;
+  document.getElementById('hd-matches').textContent = done;
+}
+function showIndicator(msg) {
+  const el = document.getElementById('save-indicator');
+  document.getElementById('save-text').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ═══════ SAVE / LOAD ═══════ */
+let _st = null;
+function saveAll() {
+  clearTimeout(_st);
+  _st = setTimeout(() => {
+    const state = { teams: tourney.teams, members: tourney.members, results: tourney.results, savedAt: new Date().toISOString() };
+    localStorage.setItem(SK, JSON.stringify(state));
+    updateLastSaved(state.savedAt);
+    showIndicator('保存しました ✓');
+  }, 500);
+}
+function loadAll() {
+  const raw = localStorage.getItem(SK);
+  if (!raw) return false;
+  try {
+    const s = JSON.parse(raw);
+    tourney.teams   = s.teams   ?? Array(8).fill('');
+    tourney.members = s.members ?? Array(8).fill(null).map(()=>[]);
+    tourney.results = s.results ?? {};
+    if (s.savedAt) updateLastSaved(s.savedAt);
+    return true;
+  } catch (e) { return false; }
+}
+function updateLastSaved(iso) {
+  const el = document.getElementById('last-saved');
+  if (!el) return;
+  const d = new Date(iso), pad = n => String(n).padStart(2, '0');
+  el.textContent = '最終保存: ' + d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate())
+    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function clearAll() {
+  if (!confirm('全データをリセットしますか？')) return;
+  tourney.teams   = Array(8).fill('');
+  tourney.members = Array(8).fill(null).map(()=>[]);
+  tourney.results = {};
+  localStorage.removeItem(SK);
+  renderTournament();
+  showIndicator('リセットしました');
+}
+function exportJSON() {
+  const blob = new Blob([JSON.stringify({ teams: tourney.teams, results: tourney.results }, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'mahokaku_tourney.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const s = JSON.parse(ev.target.result);
+      if (!confirm('現在のデータを上書きしますか？')) return;
+      tourney.teams   = s.teams   ?? Array(8).fill('');
+      tourney.results = s.results ?? {};
+      renderTournament(); saveAll(); showIndicator('インポート完了 ✓');
+    } catch { alert('読み込み失敗'); }
+  };
+  r.readAsText(file);
+  e.target.value = '';
+}
+function resetAllTourney() {
+  if (!confirm('トーナメントを全リセットしますか？')) return;
+  tourney.teams   = Array(8).fill('');
+  tourney.members = Array(8).fill(null).map(()=>[]);
+  tourney.results = {};
+  renderTournament(); saveAll();
+}
+
+// Close modals on backdrop click
+document.getElementById('rd-modal').addEventListener('click', function (e) {
+  if (e.target === this) closeResultDetail();
+});
+document.getElementById('t-modal').addEventListener('click', function (e) {
+  if (e.target === this) closeTModal();
+});
+
+/* ═══════ BOOT ═══════ */
+window.addEventListener('DOMContentLoaded', function () {
+  loadAll();
+  renderTournament();
+});
+</script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
