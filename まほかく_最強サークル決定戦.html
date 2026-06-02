@@ -1349,12 +1349,20 @@ async function getFileSha() {
     return (await res.json()).sha;
   } catch { return undefined; }
 }
+// データが実際に存在するか判定
+function stateHasData(s) {
+  return (s.teams && s.teams.some(t => t && t.trim())) ||
+         (s.results && Object.keys(s.results).length > 0);
+}
 async function syncToGitHub() {
   if (!ghSettings.token) return;
+  const state = buildState();
+  // データが空の場合はGitHubへ書き込まない（空データで上書き防止）
+  if (!stateHasData(state)) return;
   showSyncStatus('syncing');
   const sha = await getFileSha();
   if (sha === undefined) { showSyncStatus('error'); return; }
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(buildState(), null, 2))));
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
   const body = { message: 'データ更新', content };
   if (sha) body.sha = sha;
   try {
@@ -1363,31 +1371,42 @@ async function syncToGitHub() {
   } catch { showSyncStatus('error'); }
 }
 async function fetchFromGitHub() {
-  if (!ghSettings.token) return false;
   try {
-    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, { headers: ghApiHeaders() });
-    if (res.status === 404) return false;
-    if (!res.ok) return false;
-    const data = await res.json();
-    const s = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
+    // トークンなし→公開rawURL（閲覧専用）、トークンあり→API経由
+    let s;
+    if (ghSettings.token) {
+      const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`, { headers: ghApiHeaders() });
+      if (res.status === 404) return false;
+      if (!res.ok) return false;
+      const data = await res.json();
+      s = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
+    } else {
+      // トークンなし：公開rawURLから直接取得（認証不要）
+      const res = await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_FILE}?t=${Date.now()}`);
+      if (!res.ok) return false;
+      s = await res.json();
+    }
+    // リモートデータが空の場合はローカルを上書きしない
+    if (!stateHasData(s)) return false;
     const localRaw = localStorage.getItem(SK);
     if (localRaw) {
       const local = JSON.parse(localRaw);
-      if (local.savedAt && s.savedAt && new Date(s.savedAt) <= new Date(local.savedAt)) return false;
+      // ローカルにデータがあり、かつリモートが古い場合は上書きしない
+      if (stateHasData(local) && local.savedAt && s.savedAt && new Date(s.savedAt) <= new Date(local.savedAt)) return false;
     }
     tourney.teams   = s.teams   ?? Array(8).fill('');
     tourney.members = s.members ?? Array(8).fill(null).map(()=>[]);
     tourney.results = s.results ?? {};
     if (s.savedAt) updateLastSaved(s.savedAt);
     localStorage.setItem(SK, JSON.stringify(s));
-    showSyncStatus('ok');
+    if (ghSettings.token) showSyncStatus('ok');
     return true;
   } catch { return false; }
 }
 function startGhPolling() {
   if (_ghPollTimer) clearInterval(_ghPollTimer);
-  if (!ghSettings.token) return;
-  showSyncStatus('ok');
+  if (ghSettings.token) showSyncStatus('ok');
+  // トークンなしでも30秒ごとに最新データを取得（閲覧専用モード）
   _ghPollTimer = setInterval(async () => {
     const updated = await fetchFromGitHub();
     if (updated) renderTournament();
@@ -1399,14 +1418,12 @@ window.addEventListener('DOMContentLoaded', async function () {
   loadGhSettings();
   loadAll();
   renderTournament();
-  // トークン入力欄に保存済みトークンを復元
   const tokenEl = document.getElementById('gh-token-inline');
   if (tokenEl && ghSettings.token) tokenEl.value = ghSettings.token;
-  if (ghSettings.token) {
-    const updated = await fetchFromGitHub();
-    if (updated) renderTournament();
-    startGhPolling();
-  }
+  // トークン有無に関わらず起動時にGitHubから最新データを取得
+  const updated = await fetchFromGitHub();
+  if (updated) renderTournament();
+  startGhPolling();
 });
 </script>
 </body>
